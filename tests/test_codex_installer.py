@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import json
+import sys
 
-from cc_led.codex_installer import codex_hooks_installed, install_codex_hooks, uninstall_codex_hooks
+from cc_led.codex_installer import _command_prefix, codex_hooks_installed, install_codex_hooks, uninstall_codex_hooks
 from cc_led.config import CODEX_HOOK_EVENTS
 
 
@@ -109,3 +110,14 @@ def test_install_codex_hooks_uses_existing_hook_group(tmp_path):
     assert len(data["hooks"]["PreToolUse"]) == 1
     assert len(data["hooks"]["PreToolUse"][0]["hooks"]) == 2
     assert "--codex-hook PreToolUse" in data["hooks"]["PreToolUse"][0]["hooks"][1]["command"]
+
+
+def test_frozen_main_exe_prefers_sibling_hook_exe(monkeypatch, tmp_path):
+    main_exe = tmp_path / "CC_LED.exe"
+    hook_exe = tmp_path / "CC_LED_Hook.exe"
+    main_exe.write_text("", encoding="utf-8")
+    hook_exe.write_text("", encoding="utf-8")
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "executable", str(main_exe))
+
+    assert _command_prefix() == f'"{hook_exe}"'

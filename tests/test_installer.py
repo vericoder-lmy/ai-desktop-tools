@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import json
+import sys
 
 from cc_led.config import CORE_HOOK_EVENTS, VERSIONED_HOOK_EVENTS
-from cc_led.installer import hooks_installed, install_hooks, uninstall_hooks
+from cc_led.installer import _command_prefix, hooks_installed, install_hooks, uninstall_hooks
 
 
 EXPECTED_INSTALL_COUNT = len(CORE_HOOK_EVENTS + VERSIONED_HOOK_EVENTS) + 1
@@ -120,3 +121,14 @@ def test_install_hooks_reads_utf8_bom_settings(tmp_path):
     result = install_hooks(settings_path=settings, exe_path=r"C:\Program Files\CC LED\cc-led.exe")
 
     assert result.added == EXPECTED_INSTALL_COUNT
+
+
+def test_frozen_main_exe_prefers_sibling_hook_exe(monkeypatch, tmp_path):
+    main_exe = tmp_path / "CC_LED.exe"
+    hook_exe = tmp_path / "CC_LED_Hook.exe"
+    main_exe.write_text("", encoding="utf-8")
+    hook_exe.write_text("", encoding="utf-8")
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "executable", str(main_exe))
+
+    assert _command_prefix() == f'"{hook_exe}"'

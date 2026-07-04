@@ -228,8 +228,16 @@ def _command_prefix(exe_path: str | None = None) -> str:
     if exe_path:
         return _quote(exe_path)
     if getattr(sys, "frozen", False):
-        return _quote(sys.executable)
+        return _quote(str(_frozen_hook_executable()))
     return f"{_quote(sys.executable)} -B {_quote(str(Path(__file__).resolve().parents[1] / 'main.py'))}"
+
+
+def _frozen_hook_executable() -> Path:
+    executable = Path(sys.executable)
+    hook_executable = executable.with_name("CC_LED_Hook.exe")
+    if executable.name.lower() != "cc_led_hook.exe" and hook_executable.exists():
+        return hook_executable
+    return executable
 
 
 def _quote(value: str) -> str:

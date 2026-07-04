@@ -1,5 +1,7 @@
 # CC LED
 
+[中文说明](README.zh-CN.md)
+
 CC LED is a Claude Code and Codex hook-driven desktop status light. It shows a topmost, draggable traffic-light overlay and a tray icon so you can see whether the agent is working, waiting for approval, done, or in error.
 
 The project was inspired by Clawd on Desk, but CC LED keeps the core status logic local and lightweight: Claude/Codex hooks send lifecycle events to a local HTTP server, the reducer aggregates all sessions, then the overlay and tray icon update.
@@ -46,8 +48,50 @@ Approval and completion use short custom WAV tones generated under `%APPDATA%\CC
 
 Bundled sound presets live under `cc_led/assets/sounds/`. User-selected sound settings are stored locally under `%APPDATA%\CC LED\sound_settings.json`.
 
-## Architecture
+## Visual Guide
 
+README preview images show three things clearly: effect style, layout direction, and active LED state. The image assets live under `docs/images/`.
+
+### Effect Gallery
+
+Use one comparison image that places all four effects side by side with the same active state, preferably `busy / yellow` so the glow is visible:
+
+![CC LED effect gallery](docs/images/effects-gallery.png)
+
+| Effect | Image Description |
+| --- | --- |
+| `Classic` | Dark rounded traffic-light body with simple glass lamps. The yellow lamp is lit, with red and green dimmed. |
+| `Apple Glass` | Neutral dark glass capsule with soft internal glow and subtle highlights. The yellow lamp is lit. |
+| `Real LED` | More realistic dark base with metal rings, lens reflections, and stronger LED glow. The yellow lamp is lit. |
+| `Pixel` | Rectangular pixel-style frame with blocky red/yellow/green lamps. The yellow lamp is lit. |
+
+### Layout Gallery
+
+Show both supported layouts using the same effect and state:
+
+![CC LED vertical and horizontal layouts](docs/images/layouts.png)
+
+| Layout | Image Description |
+| --- | --- |
+| `Vertical` | Three LEDs stacked from top to bottom: red, yellow, green. This is the default traffic-light layout. |
+| `Horizontal` | Three LEDs arranged from left to right: red, yellow, green. This is useful for a shorter overlay near the top or bottom of the screen. |
+
+### State Gallery
+
+Use a state comparison image or a short animated capture to explain what each LED means:
+
+![CC LED state gallery](docs/images/states.png)
+
+| State | Active LED | Image Description |
+| --- | --- | --- |
+| `idle` | Green solid | Green lamp is lit continuously; red and yellow are dimmed. |
+| `busy` | Yellow blinking | Yellow lamp blinks at a steady 1 Hz rhythm while Claude or Codex is working. |
+| `approval` | Red blinking | Red lamp blinks when approval, elicitation, or user attention is needed. |
+| `error` | Red solid | Red lamp stays solid for failures such as tool errors, stop failures, or API errors. |
+
+For static screenshots, capture the blinking states while the lamp is on. In captions, mention that `busy` and `approval` blink even though the still image only shows one frame.
+
+## Architecture
 ```text
 Claude Code / Codex
   -> hook command: python main.py --hook <event>
@@ -88,6 +132,13 @@ python main.py
 ```
 
 This starts the floating overlay, tray icon, local state server, and health monitor.
+
+Packaged Windows releases include two executables:
+
+- `CC_LED.exe`: the no-terminal desktop app you launch manually
+- `CC_LED_Hook.exe`: the hook helper used by Claude/Codex
+
+Keep both files in the same folder. When `CC_LED.exe --install-hooks` or `CC_LED.exe --install-codex-hooks` is run from a packaged release, hook commands automatically point to `CC_LED_Hook.exe`.
 
 ## Claude Hooks
 
@@ -220,3 +271,4 @@ CC_LED/
       tray.py
   tests/
 ```
+
