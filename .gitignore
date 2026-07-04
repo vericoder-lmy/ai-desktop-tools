@@ -1,16 +1,3 @@
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.venv/
-.env
-.env.*
-.agents/
-.codex/
-*.bak
-*.tmp
-*.zip
-release/
-dist/
-build/
-*.spec
-*.log
+.vscode/
+Clawd on Desk/
+效果.txt
